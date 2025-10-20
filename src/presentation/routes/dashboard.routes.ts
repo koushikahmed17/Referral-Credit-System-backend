@@ -2,9 +2,9 @@ import { Router } from "express";
 
 const router = Router();
 
-// Referral routes will be implemented here
+// Dashboard routes will be implemented here
 router.get("/", (req, res) => {
-  res.json({ message: "Referral routes - Coming soon" });
+  res.json({ message: "Dashboard routes - Coming soon" });
 });
 
 export default router;
