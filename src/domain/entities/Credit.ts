@@ -1,0 +1,1 @@
+// Credit entity definition
