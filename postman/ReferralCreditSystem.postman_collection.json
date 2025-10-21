@@ -591,6 +591,125 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Stats (Full)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "stats"]
+            },
+            "description": "Get complete dashboard statistics:\n- Total referred users\n- Number who purchased\n- Total credits earned\n- Referral link\n- User info\n- Recent referrals (last 10)\n- Recent purchases (last 10)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard Summary (Lighter)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "summary"]
+            },
+            "description": "Get dashboard summary (optimized for mobile):\n- Overview stats\n- Referral info with shareable message\n- Recent activity (last 5 items)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Referral Link with Share Buttons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/referral-link",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "referral-link"]
+            },
+            "description": "Get referral link with social share URLs:\n- Referral code\n- Referral link\n- Shareable message\n- Social share links (Twitter, Facebook, WhatsApp, Email)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Credit History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/credit-history",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "credit-history"]
+            },
+            "description": "Get complete credit transaction history:\n- Current balance\n- Total earned\n- History with source tracking (referral_reward vs signup_bonus)"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Data Integrity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/verify-integrity",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "verify-integrity"]
+            },
+            "description": "Verify data integrity (admin/debug endpoint):\n- Check for double-crediting\n- Check for duplicate referrals\n- Verify confirmed referrals have purchases\n- Compare expected vs actual credits"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard (Default)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard"]
+            },
+            "description": "Default dashboard route (returns summary)"
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

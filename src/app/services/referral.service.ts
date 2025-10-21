@@ -246,40 +246,57 @@ export class ReferralService {
   /**
    * Convert a pending referral to confirmed (when referred user makes first purchase)
    * Awards 2 credits to BOTH referrer and referred user
+   * Uses findOneAndUpdate with status check to prevent race conditions
    */
   static async convertReferral(referralId: string): Promise<ReferralResponse> {
     try {
-      const referral = await ReferralModel.findById(referralId);
+      // Use findOneAndUpdate with status check to prevent double-conversion
+      // This is atomic and prevents race conditions
+      const referral = await ReferralModel.findOneAndUpdate(
+        {
+          _id: referralId,
+          status: ReferralStatus.PENDING, // Only update if still pending
+        },
+        {
+          $set: {
+            status: ReferralStatus.CONFIRMED,
+            confirmedAt: new Date(),
+            creditsEarned: 2,
+          },
+        },
+        { new: true } // Return updated document
+      );
+
       if (!referral) {
-        throw new Error("Referral not found");
+        throw new Error(
+          "Referral not found or already processed (not in pending status)"
+        );
       }
 
-      if (referral.status !== ReferralStatus.PENDING) {
-        throw new Error("Referral is not in pending status");
-      }
-
-      // Update referral status to confirmed
-      referral.status = ReferralStatus.CONFIRMED;
-      referral.confirmedAt = new Date();
-
-      // Award 2 credits to both users
+      // Award 2 credits to both users using atomic increment
       const creditsToAward = 2;
-      referral.creditsEarned = creditsToAward;
 
-      await referral.save();
-
-      // Award 2 credits to the referrer (Lina)
-      await UserModel.findByIdAndUpdate(referral.referrerId, {
-        $inc: { credits: creditsToAward },
-      });
-
-      // Award 2 credits to the referred user (Ryan)
-      await UserModel.findByIdAndUpdate(referral.referredUserId, {
-        $inc: { credits: creditsToAward },
-      });
+      await Promise.all([
+        // Award 2 credits to the referrer (Lina)
+        UserModel.findByIdAndUpdate(
+          referral.referrerId,
+          {
+            $inc: { credits: creditsToAward },
+          },
+          { new: true }
+        ),
+        // Award 2 credits to the referred user (Ryan)
+        UserModel.findByIdAndUpdate(
+          referral.referredUserId,
+          {
+            $inc: { credits: creditsToAward },
+          },
+          { new: true }
+        ),
+      ]);
 
       logger.info(
-        `Converted referral ${referralId}: Awarded ${creditsToAward} credits to both referrer and referred user`
+        `Converted referral ${referralId}: Awarded ${creditsToAward} credits to both referrer and referred user (ATOMIC OPERATION)`
       );
 
       return {
