@@ -1,34 +1,56 @@
-import { Referral } from "../../domain/entities/Referral";
+import { ReferralStatus } from "../../domain/entities/Referral";
 
-export interface CreateReferralDTO {
-  referrerId: string;
-  referredUserId: string;
+export interface ReferralStats {
+  totalReferred: number;
+  converted: number;
+  pending: number;
+  totalCredits: number;
+  referralLink: string;
   referralCode: string;
-  rewardAmount?: number;
+}
+
+export interface CreateReferralRequest {
+  name?: string; // Optional name for generating referral code
+}
+
+export interface ApplyReferralRequest {
+  referralCode: string;
+  userId: string;
 }
 
 export interface ReferralResponse {
-  referral: Referral;
-  message: string;
+  id: string;
+  referrerId: string;
+  referredUserId?: string;
+  status: ReferralStatus;
+  creditsEarned: number;
+  referralCode: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface ReferralStats {
-  totalReferrals: number;
-  completedReferrals: number;
-  pendingReferrals: number;
-  totalRewards: number;
-  averageReward: number;
+export interface ReferralListResponse {
+  referrals: ReferralResponse[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface ReferralServiceInterface {
-  createReferral(data: CreateReferralDTO): Promise<ReferralResponse>;
-  getReferralStats(userId: string): Promise<ReferralStats>;
+  generateReferralCode(userId: string, name?: string): Promise<string>;
   applyReferralCode(
     referralCode: string,
-    userId: string
+    newUserId: string
   ): Promise<ReferralResponse>;
-  getUserReferrals(userId: string): Promise<Referral[]>;
+  getReferralStats(userId: string): Promise<ReferralStats>;
+  getUserReferrals(
+    userId: string,
+    page?: number,
+    limit?: number
+  ): Promise<ReferralListResponse>;
+  convertReferral(referralId: string): Promise<ReferralResponse>;
   validateReferralCode(referralCode: string): Promise<boolean>;
 }
-
-export default ReferralServiceInterface;

@@ -9,7 +9,10 @@
     "build": "tsc",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "db:reset": "ts-node-dev --transpile-only src/scripts/resetDatabase.ts",
+    "db:seed": "ts-node-dev --transpile-only src/scripts/seedDatabase.ts",
+    "db:fresh": "npm run db:reset && npm run db:seed"
   },
   "keywords": [
     "referral",

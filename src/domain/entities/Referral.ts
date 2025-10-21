@@ -2,21 +2,19 @@ export interface Referral {
   id: string;
   referrerId: string;
   referredUserId: string;
-  referralCode: string;
-  status: "pending" | "completed" | "cancelled";
-  rewardAmount: number;
+  status: ReferralStatus;
+  creditsEarned: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export enum ReferralStatus {
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  CANCELLED = "cancelled",
 }
 
 export interface CreateReferralRequest {
   referrerId: string;
   referredUserId: string;
-  referralCode: string;
-  rewardAmount?: number;
-}
-
-export interface UpdateReferralRequest {
-  status?: "pending" | "completed" | "cancelled";
-  rewardAmount?: number;
 }

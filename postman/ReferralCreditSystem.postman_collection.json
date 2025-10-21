@@ -1,0 +1,596 @@
+{
+  "info": {
+    "name": "Referral & Credit System API",
+    "_postman_id": "referral-credit-api-2025",
+    "description": "Complete API collection for Referral & Credit System Backend\n\nScenario Flow:\n1. Lina registers → Gets referralCode (e.g., LINA123)\n2. Ryan registers with Lina's code → Referral created (PENDING)\n3. Ryan makes first purchase → Both get 2 credits, referral CONFIRMED\n4. Future purchases → No additional credits",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "referralCode",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Root Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register - Lina (Referrer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.data.token);",
+                  "    pm.collectionVariables.set('userId', response.data.user.id);",
+                  "    pm.collectionVariables.set('referralCode', response.data.user.referralCode);",
+                  "    console.log('Lina registered! ReferralCode:', response.data.user.referralCode);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"lina@example.com\",\n  \"password\": \"SecurePass123\",\n  \"firstName\": \"Lina\",\n  \"lastName\": \"Smith\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register Lina - she will receive a referral code"
+          },
+          "response": []
+        },
+        {
+          "name": "Register - Ryan (With Referral Code)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.data.token);",
+                  "    pm.collectionVariables.set('userId', response.data.user.id);",
+                  "    console.log('Ryan registered with referral code!');",
+                  "    console.log('Credits:', response.data.user.credits);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ryan@example.com\",\n  \"password\": \"SecurePass456\",\n  \"firstName\": \"Ryan\",\n  \"lastName\": \"Johnson\",\n  \"referralCode\": \"{{referralCode}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register Ryan using Lina's referral code (use {{referralCode}} from previous request)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('token', response.data.token);",
+                  "    pm.collectionVariables.set('userId', response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ryan@example.com\",\n  \"password\": \"SecurePass456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "verify"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check Auth Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Referrals",
+      "item": [
+        {
+          "name": "Get My Referral Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "stats"]
+            },
+            "description": "Get referral statistics:\n- Total referred users\n- Converted referrals\n- Pending referrals\n- Total credits earned\n- Referral link"
+          },
+          "response": []
+        },
+        {
+          "name": "List My Referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/list?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "list"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get paginated list of all users you referred"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Referral Code (Private)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/validate/{{referralCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "validate", "{{referralCode}}"]
+            },
+            "description": "Validate if a referral code exists (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Referral Code Details (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/details/{{referralCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "details", "{{referralCode}}"]
+            },
+            "description": "Get referral code details - public endpoint, no auth required"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Custom Referral Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Summer2025\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "generate"]
+            },
+            "description": "Generate a custom referral code with optional name"
+          },
+          "response": []
+        },
+        {
+          "name": "Apply Referral Code (Post-Registration)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referralCode\": \"{{referralCode}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/apply",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "apply"]
+            },
+            "description": "Apply a referral code after registration (if not done during signup)"
+          },
+          "response": []
+        },
+        {
+          "name": "Convert Referral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referralId\": \"referral_id_here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/referrals/convert",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "referrals", "convert"]
+            },
+            "description": "Manually convert a pending referral to confirmed (Note: This happens automatically on first purchase)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Purchases",
+      "item": [
+        {
+          "name": "Create Purchase - First Purchase (Triggers Referral Reward)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data.referralReward) {",
+                  "        console.log('🎉 REFERRAL REWARD TRIGGERED!');",
+                  "        console.log('Credits earned:', response.data.referralReward.creditsEarned);",
+                  "        console.log('Message:', response.data.referralReward.message);",
+                  "    } else {",
+                  "        console.log('No referral reward (not first purchase or no referral)');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50,\n  \"description\": \"Premium Subscription\",\n  \"productId\": \"prod_premium_001\",\n  \"metadata\": {\n    \"plan\": \"premium\",\n    \"duration\": \"monthly\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases"]
+            },
+            "description": "Create a purchase. If this is the user's FIRST purchase and they were referred:\n- Referrer gets 2 credits\n- Buyer gets 2 credits\n- Referral status: PENDING → CONFIRMED\n\nResponse includes 'referralReward' field on first purchase only."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Purchase - Second Purchase (No Reward)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 30,\n  \"description\": \"Extra Credits Package\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases"]
+            },
+            "description": "Second purchase - no referral rewards will be given"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Purchases",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get paginated list of user's purchases"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Purchase Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases", "stats"]
+            },
+            "description": "Get purchase statistics:\n- Total purchases\n- Total amount spent\n- Completed purchases\n- Pending purchases\n- Average purchase amount"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Purchase by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases/purchase_id_here",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "purchases", "purchase_id_here"]
+            },
+            "description": "Get a specific purchase by ID"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
